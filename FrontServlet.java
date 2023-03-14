@@ -5,6 +5,7 @@
  */
 package etu2018.framework.servlet;
 
+import etu2018.framework.*;
 import java.io.*;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -13,6 +14,7 @@ import java.rmi.ServerException;
 
 
 public class FrontServlet extends HttpServlet {
+    HashMap<String,Mapping> MappingUrls;
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
