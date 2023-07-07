@@ -2,6 +2,7 @@ package etu2018.framework.servlet;
 
 import etu2018.framework.*;
 import etu2018.framework.annotation.*;
+import model.*;
 import java.io.*;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -13,12 +14,15 @@ import java.rmi.ServerException;
 
 public class FrontServlet extends HttpServlet {
     HashMap<String,Mapping> mappingUrls = new HashMap<>();
+    
     public void setMappingUrls(HashMap<String,Mapping> mappingUrls){
         this.mappingUrls = mappingUrls;
     }
+    
     public HashMap<String,Mapping> getMappingUrls(){
         return this.mappingUrls;
     }
+    
     public static List<Class<?>> findClasses(File directory, String packageName) throws ClassNotFoundException {
         List<Class<?>> classes = new ArrayList<>();
         if (!directory.exists()) {
@@ -95,13 +99,25 @@ public class FrontServlet extends HttpServlet {
         }
     }
 
+    public void getData(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        PrintWriter out = response.getWriter();
+        Enumeration<String> param = request.getParameterNames();
+        while(param.hasMoreElements()){
+            String name = param.nextElement();
+            String value = (String)request.getParameter(name);  
+            out.println("ity ny name : " + name);
+            out.println("ito ny value any : " +  value);
+        }
+    }
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         out.println("<h3>Servlet UrlController at " + request.getServletPath() + "</h3>");
+        out.println("<p>" + request.getContextPath() + "</p>");
         out.println(mappingUrls.size());
-        sendData(request,response,request.getServletPath());   
+        getData(request,response);
+        sendData(request,response,request.getServletPath());
     }
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -111,5 +127,4 @@ public class FrontServlet extends HttpServlet {
             throws ServletException, IOException {
         processRequest(request, response);
     }
-
 }
