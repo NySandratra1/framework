@@ -63,17 +63,45 @@ public class FrontServlet extends HttpServlet {
         }
     }
 
+    public void sendData(HttpServletRequest request, HttpServletResponse response,String servletpath) throws ServletException, IOException {
+        PrintWriter out = response.getWriter();
+        for(Map.Entry<String, Mapping> entry : mappingUrls.entrySet()){
+            String url = entry.getKey();
+           out.println("<p>" + url + "</p>");
+            Mapping map = entry.getValue();
+            if(url.equals(servletpath)){ 
+                try{
+                    Class<?> cla = Class.forName(map.getClasse());
+                    Method m = cla.getMethod(map.getMethod());
+                    ModelView model = (ModelView)(m.invoke(cla.newInstance()));
+                    for(Map.Entry<String,Object> datas : model.getData().entrySet()){
+                        String values = datas.getKey();
+                        Object o = (Object)datas.getValue();
+                        request.setAttribute(values,o);
+                    }
+                    RequestDispatcher dispatch = request.getRequestDispatcher(model.getView());
+                    dispatch.forward(request,response);
+                    return;
+                }
+                catch (Exception e) {
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    e.printStackTrace(pw);
+                    String stackTrace = sw.toString();
+                    out.println("<p>Nisy erreur: </p>");
+                    out.println("<pre>" + stackTrace + "</pre>");
+                }
+            }
+        }
+    }
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         out.println("<h3>Servlet UrlController at " + request.getServletPath() + "</h3>");
         out.println(mappingUrls.size());
-        for(Map.Entry<String, Mapping> entry : mappingUrls.entrySet()){
-            String url = entry.getKey();
-            Mapping map = entry.getValue();
-            out.println("<p>" + map.getMethod() + "</p>");
-        }   
+        sendData(request,response,request.getServletPath());   
     }
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
